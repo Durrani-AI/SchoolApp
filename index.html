@@ -8,17 +8,29 @@
 </head>
 <body>
     <div id="app">
-        <h1>{{ subject }}</h1>
-        <p>Location: {{ location }}</p>
-        <p>Price: {{ price }}</p>
-        <img :src="image" :alt="imageAlt">
+        <button @click="toggleCart" :disabled="numberOfItems === 0">
+            Checkout ({{ numberOfItems }})
+        </button>
+
+        <div v-if="!displayCart">
+           <br>
+           <h1>{{ subject }}</h1>
+           <p>Location: {{ location }}</p>
+           <p>Price: {{ price }}</p>
+           <p>Spaces: {{ availability }}</p>
+           <img :src="image" :alt="imageAlt">
+           <br>
+           <button @click="addToCart" :disabled="!canAddToCart">Add to cart</button>
+        </div>
+
+
+        <div v-else>
+            <h1>Checkout</h1>
+        </div>
     </div>
+
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <img src="image.jpg" alt="A student coding on a laptop">
-    <script type="module">
-        const {createApp} = Vue
-    </script>
     <script src="Vue.js"></script>
-    
 </body>
 </html>
