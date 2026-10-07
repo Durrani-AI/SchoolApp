@@ -16,6 +16,7 @@
         <img :src="image" :alt="imageAlt">
     </div>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <img src="image.jpg" alt="A student coding on a laptop">
     <script type="module">
         const {createApp} = Vue
         createApp({
@@ -24,8 +25,7 @@
                     subject: 'Computer Science',
                     location: 'Hendon',
                     price: '£20',
-                    image: 'images/lesson.jpg',
-                    imageAlt: 'A student coding on a laptop'
+                    
                 }
             }
         }).mount('#app')
