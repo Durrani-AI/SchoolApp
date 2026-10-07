@@ -3,18 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>After-School Lesson</title>
+    <style>
+        img { width: 300px; height: auto; }
+    </style>
 </head>
 <body>
-    <header> 
-        <h1>Welcome to our school app</h1>
-    </header>
-    <main>
-        <h2>Home</h2>
-        <p>Welcome to our school app. Here you can find information about our school, our students, and our teachers.</p>
-    </main>
-    <footer>
-        <p>Copyright &copy; 2024. This is for educational purposes only</p>
-    </footer>
-    </body>
+    <div id="app">
+        <h1>{{ subject }}</h1>
+        <p>Location: {{ location }}</p>
+        <p>Price: {{ price }}</p>
+        <img :src="image" :alt="imageAlt">
+    </div>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script type="module">
+        const {createApp} = Vue
+        createApp({
+            data() {
+                return {
+                    subject: 'Computer Science',
+                    location: 'Hendon',
+                    price: '£20',
+                    image: 'images/lesson.jpg',
+                    imageAlt: 'A student coding on a laptop'
+                }
+            }
+        }).mount('#app')
+    </script>
+</body>
 </html>
