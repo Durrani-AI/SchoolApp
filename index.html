@@ -18,7 +18,7 @@
            <p>Location: {{ location }}</p>
            <p>Price: {{ price }}</p>
            <p>Spaces: {{ availability }}</p>
-           <img :src="image" :alt="imageAlt">
+           <img src="image.jpg" alt="A student coding on a laptop">
            <br>
            <button @click="addToCart" :disabled="!canAddToCart">Add to cart</button>
         </div>
@@ -30,7 +30,6 @@
     </div>
 
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <img src="image.jpg" alt="A student coding on a laptop">
     <script src="Vue.js"></script>
 </body>
 </html>
