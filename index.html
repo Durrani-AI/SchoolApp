@@ -8,24 +8,42 @@
 </head>
 <body>
     <div id="app">
-        <button @click="toggleCart" :disabled="numberOfItems === 0">
+        <button @click="toggleCart" :disabled="numberOfItems === 0 && !displayCart">
             Checkout ({{ numberOfItems }})
         </button>
 
-        <div v-if="!displayCart">
-           <br>
-           <h1>{{ subject }}</h1>
-           <p>Location: {{ location }}</p>
-           <p>Price: {{ price }}</p>
-           <p>Spaces: {{ availability }}</p>
-           <img src="image.jpg" alt="A student coding on a laptop">
-           <br>
-           <button @click="addToCart" :disabled="!canAddToCart">Add to cart</button>
-        </div>
+        <p v-if="confirmation">{{ confirmation }}</p>
 
+        <div v-if="!displayCart">
+            <div v-for="lesson in lessons" :key="lesson.id">
+                <br>
+                <h1>{{ lesson.subject }}</h1>
+                <p>Location: {{ lesson.location }}</p>
+                <p>Price: {{ lesson.price }}</p>
+                <p>Spaces: {{ lesson.availability }}</p>
+                <img :src="lesson.image" :alt="lesson.subject">
+                <br>
+                <button @click="addToCart(lesson)" :disabled="!canAddToCart(lesson)">Add to cart</button>
+            </div>
+        </div>
 
         <div v-else>
             <h1>Checkout</h1>
+
+            <div v-for="lesson in lessons" :key="lesson.id">
+                <p v-if="countInCart(lesson.id) > 0">
+                    {{ lesson.subject }} x {{ countInCart(lesson.id) }}
+                    <button @click="removeFromCart(lesson)">Remove</button>
+                </p>
+            </div>
+
+            <p>
+                <label>Name: <input type="text" v-model="order.name"></label>
+            </p>
+            <p>
+                <label>Telephone: <input type="text" v-model="order.telephone"></label>
+            </p>
+            <button @click="checkout" :disabled="!canCheckout">Checkout</button>
         </div>
     </div>
 
