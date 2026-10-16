@@ -15,7 +15,19 @@
         <p v-if="confirmation">{{ confirmation }}</p>
 
         <div v-if="!displayCart">
-            <div v-for="lesson in lessons" :key="lesson.id">
+            <p>
+                <label>Sort by:
+                    <select v-model="sortType">
+                        <option value="price">Price</option>
+                        <option value="availability">Availability</option>
+                        <option value="location">Location</option>
+                        <option value="subject">Subject</option>
+                    </select>
+                </label>
+                <label><input type="radio" :value="true" v-model="sortAscending"> Ascending</label>
+                <label><input type="radio" :value="false" v-model="sortAscending"> Descending</label>
+            </p>
+            <div v-for="lesson in sortedLessons" :key="lesson.id">
                 <br>
                 <h1>{{ lesson.subject }}</h1>
                 <p>Location: {{ lesson.location }}</p>

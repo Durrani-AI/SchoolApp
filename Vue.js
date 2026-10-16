@@ -13,10 +13,20 @@ const {createApp} = Vue
                     },
                     cart: [],
                     displayCart: false,
-                    confirmation: ''
+                    confirmation: '',
+                    sortAscending: true,
+                    sortType: 'price'
                 }
             },
+            created() {
+                this.fetchData()
+            },
             methods: {
+                async fetchData() {
+                    const url = "http://localhost:3000/"
+                    let response = await (fetch(url))
+                    this.lessons = await response.json()
+                },
                 addToCart(lesson) {
                     this.cart.push(lesson.id)
                     lesson.availability--
@@ -51,6 +61,25 @@ const {createApp} = Vue
                 },
                 canCheckout() {
                     return this.order.name.trim() !== '' && this.order.telephone.trim() !== ''
+                },
+                sortedLessons() {
+                    const type = this.sortType
+                    const value = (lesson) => {
+                        const v = lesson[type]
+                        if (type === 'price') {
+                            return parseFloat(String(v).replace(/[^0-9.]/g, ''))
+                        }
+                        return v
+                    }
+                    const sorted = [...this.lessons].sort((a, b) => {
+                        const x = value(a)
+                        const y = value(b)
+                        if (typeof x === 'string') {
+                            return x.localeCompare(y)
+                        }
+                        return x - y
+                    })
+                    return this.sortAscending ? sorted : sorted.reverse()
                 }
             }
         }).mount('#app')
