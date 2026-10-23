@@ -33,7 +33,7 @@
                 <p>Location: {{ lesson.location }}</p>
                 <p>Price: {{ lesson.price }}</p>
                 <p>Spaces: {{ lesson.availability }}</p>
-                <img :src="lesson.image" :alt="lesson.subject">
+                <img :src="imageUrl(lesson.image)" :alt="lesson.subject">
                 <br>
                 <button @click="addToCart(lesson)" :disabled="!canAddToCart(lesson)">Add to cart</button>
             </div>

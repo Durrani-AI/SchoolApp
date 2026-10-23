@@ -23,9 +23,12 @@ const {createApp} = Vue
             },
             methods: {
                 async fetchData() {
-                    const url = "http://localhost:3000/"
+                    const url = "http://localhost:3000/lessons"
                     let response = await (fetch(url))
                     this.lessons = await response.json()
+                },
+                imageUrl(path) {
+                    return "http://localhost:3000/" + String(path).replace(/^\/+/, '')
                 },
                 addToCart(lesson) {
                     this.cart.push(lesson.id)
@@ -47,7 +50,17 @@ const {createApp} = Vue
                 toggleCart() {
                     this.displayCart = !this.displayCart
                 },
-                checkout() {
+                async checkout() {
+                    const orderData = {
+                        name: this.order.name,
+                        telephone: this.order.telephone,
+                        lessonIDs: this.cart
+                    }
+                    await fetch("http://localhost:3000/orders", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(orderData)
+                    })
                     this.confirmation = 'Order confirmed. Thank you, ' + this.order.name + '!'
                     this.cart = []
                     this.order.name = ''
