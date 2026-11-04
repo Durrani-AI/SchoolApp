@@ -8,17 +8,11 @@ const {createApp} = Vue
             data() {
                 // Send back an object that holds all our starting values.
                 return {
-                    // "lessons" is a list of all the lessons. These are just starting
-                    // (placeholder) values. They get replaced by the real list from the server.
-                    lessons: [
-                        // Each lesson has: an id (unique number), subject, location, price,
-                        // availability (how many spaces are left) and an image file name.
-                        { id: 1001, subject: 'Computer Science', location: 'Hendon', price: '£20', availability: 5, image: 'image.jpg' },
-                        // A second example lesson (Mathematics).
-                        { id: 1002, subject: 'Mathematics', location: 'Colindale', price: '£15', availability: 5, image: 'image.jpg' },
-                        // A third example lesson (English).
-                        { id: 1003, subject: 'English', location: 'Brent Cross', price: '£18', availability: 5, image: 'image.jpg' }
-                    ], // End of the lessons list.
+                    // "lessons" is a list of all the lessons. It starts EMPTY ([]) because
+                    // the real lessons are loaded from MongoDB by fetchData().
+                    // Each lesson from MongoDB has: _id (MongoDB's unique id), subject, location,
+                    // price, availability (how many spaces are left) and an image file name.
+                    lessons: [],
                     // "order" holds what the user types in the checkout form.
                     order: {
                         // The user's name. It starts empty ('').
@@ -26,8 +20,9 @@ const {createApp} = Vue
                         // The user's phone number. It also starts empty.
                         telephone: ''
                     }, // End of the order object.
-                    // "cart" is the shopping cart. It is a list of lesson ids the user has added.
-                    // Example: [1001, 1001, 1002] means 2 Computer Science + 1 Mathematics.
+                    // "cart" is the shopping cart. It ONLY stores the MongoDB _id of each lesson added,
+                    // not the full lesson details (so the database doesn't store repeated information).
+                    // Example: ["65a1...", "65a1...", "65b2..."] means 2 of one lesson + 1 of another.
                     cart: [],
                     // "displayCart" decides which page to show.
                     // false = show the lessons list, true = show the checkout page.
@@ -68,16 +63,16 @@ const {createApp} = Vue
                 }, // End of imageUrl().
                 // addToCart puts a lesson into the shopping cart.
                 addToCart(lesson) {
-                    // Add this lesson's id to the end of the cart list.
-                    this.cart.push(lesson.id)
+                    // Add this lesson's MongoDB _id to the end of the cart list.
+                    this.cart.push(lesson._id)
                     // Take 1 away from the spaces left for this lesson.
                     lesson.availability--
                 }, // End of addToCart().
                 // removeFromCart takes one of this lesson out of the cart.
                 removeFromCart(lesson) {
-                    // Find the position of this lesson's id in the cart.
+                    // Find the position of this lesson's _id in the cart.
                     // If it is not in the cart, indexOf gives back -1.
-                    const index = this.cart.indexOf(lesson.id)
+                    const index = this.cart.indexOf(lesson._id)
                     // Only continue if the lesson was found (the position is not -1).
                     if (index !== -1) {
                         // Remove 1 item from the cart at that position.
@@ -110,9 +105,9 @@ const {createApp} = Vue
                     const orderData = {
                         // The name the user typed in.
                         name: this.order.name,
-                        // The phone number the user typed in.
-                        telephone: this.order.telephone,
-                        // The list of lesson ids in the cart.
+                        // The phone number the user typed in (saved in the database as "phone").
+                        phone: this.order.telephone,
+                        // ONLY the list of lesson _ids in the cart - no subject, location, price etc.
                         lessonIDs: this.cart
                     } // End of orderData.
                     // Send the order to the server and wait until it is done.
@@ -124,6 +119,15 @@ const {createApp} = Vue
                         // Turn our orderData object into JSON text so it can be sent.
                         body: JSON.stringify(orderData)
                     }) // End of the fetch request.
+                    // TASK 7.7: now tell the server the new number of spaces for each lesson that was ordered.
+                    // Go through every lesson, one at a time.
+                    for (const lesson of this.lessons) {
+                        // Only update lessons that are actually in the cart (counted at least once).
+                        if (this.countInCart(lesson._id) > 0) {
+                            // Send a PUT request to save this lesson's new availability in the database.
+                            await this.updateLesson(lesson)
+                        } // End of the "is it in the cart?" check.
+                    } // End of the loop through the lessons.
                     // Make the "thank you" message, including the user's name.
                     this.confirmation = 'Order confirmed. Thank you, ' + this.order.name + '!'
                     // Empty the cart, because the order is finished.
@@ -134,7 +138,34 @@ const {createApp} = Vue
                     this.order.telephone = ''
                     // Go back to the lessons page.
                     this.displayCart = false
-                } // End of checkout().
+                }, // End of checkout().
+                // TASK 7.6 / 7.7: updateLesson sends a PUT request to change one lesson in the database.
+                // "lesson" is the lesson we want to update.
+                async updateLesson(lesson){
+                    // The information we want to change. In Task 7.6 this was always 30.
+                    // In Task 7.7 we send the lesson's CURRENT spaces left instead
+                    // (this number already went down when the user clicked "Add to cart").
+                    let updateBody = {
+                        // The new number of spaces left for this lesson.
+                        availability: lesson.availability
+                    }; // End of updateBody.
+                    // Build the address: the server's lessons route + this lesson's MongoDB _id.
+                    // Example: "http://localhost:3000/lessons/65a1b2c3..."
+                    const url = "http://localhost:3000/lessons/" + lesson._id;
+                    // The settings for our request.
+                    const options = {
+                        // "PUT" means we are UPDATING something that already exists.
+                        method: 'PUT',
+                        // Tell the server that the data we send is in JSON format.
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }, // End of headers.
+                        // Turn updateBody into JSON text so it can be sent.
+                        body: JSON.stringify(updateBody)
+                    } // End of options.
+                    // Send the request to the server and wait for it to answer.
+                    let response = await (fetch (url, options));
+                } // End of updateLesson().
             }, // End of methods.
             // "computed" values are worked out automatically from the data.
             // Whenever the data they use changes, they recalculate by themselves.

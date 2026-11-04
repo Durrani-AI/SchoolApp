@@ -59,8 +59,8 @@
             <!-- End of the sorting paragraph. -->
             </p>
             <!-- v-for is a loop: make one copy of this div for EACH lesson in sortedLessons. -->
-            <!-- :key gives each copy a unique id so Vue can keep track of them. -->
-            <div v-for="lesson in sortedLessons" :key="lesson.id">
+            <!-- :key gives each copy a unique id (the MongoDB _id) so Vue can keep track of them. -->
+            <div v-for="lesson in sortedLessons" :key="lesson._id">
                 <!-- A line break (empty space). -->
                 <br>
                 <!-- Show the lesson's subject as a big heading. -->
@@ -91,11 +91,11 @@
             <h1>Checkout</h1>
 
             <!-- Loop through every lesson. -->
-            <div v-for="lesson in lessons" :key="lesson.id">
+            <div v-for="lesson in lessons" :key="lesson._id">
                 <!-- Only show this lesson if it is in the cart at least once. -->
-                <p v-if="countInCart(lesson.id) > 0">
+                <p v-if="countInCart(lesson._id) > 0">
                     <!-- Show the subject and how many of it are in the cart, e.g. "English x 2". -->
-                    {{ lesson.subject }} x {{ countInCart(lesson.id) }}
+                    {{ lesson.subject }} x {{ countInCart(lesson._id) }}
                     <!-- Remove button. When clicked, take one of this lesson out of the cart. -->
                     <button @click="removeFromCart(lesson)">Remove</button>
                 <!-- End of this cart item. -->
