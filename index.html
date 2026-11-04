@@ -1,65 +1,133 @@
 <!DOCTYPE html>
+<!-- The line above tells the browser this is a modern HTML5 page. -->
+<!-- (It must always be the very first line, so this comment comes after it.) -->
+<!-- The start of the web page. lang="en" means the page is in English. -->
 <html lang="en">
+<!-- The "head" holds settings about the page. Nothing here is shown on the page itself. -->
 <head>
+    <!-- Use UTF-8 so all characters show properly (like the £ sign). -->
     <meta charset="UTF-8">
+    <!-- Makes the page fit nicely on phones and small screens. -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- The text shown on the browser tab. -->
     <title>After-School Lessons</title>
+    <!-- Link our CSS file (style.css), which controls how things look. -->
     <link rel="stylesheet" href="style.css">
+<!-- End of the head. -->
 </head>
+<!-- The "body" holds everything that is shown on the page. -->
 <body>
+    <!-- This div is where our Vue app lives. Vue controls everything inside id="app". -->
     <div id="app">
+        <!-- The Checkout button at the top. -->
+        <!-- @click="toggleCart" -> when clicked, run toggleCart() to switch pages. -->
+        <!-- :disabled="..." -> grey out (turn off) the button if the cart is empty AND we are on the lessons page. -->
         <button @click="toggleCart" :disabled="numberOfItems === 0 && !displayCart">
+            <!-- Show the word "Checkout" and the number of items in the cart. {{ }} prints a value from Vue. -->
             Checkout ({{ numberOfItems }})
+        <!-- End of the Checkout button. -->
         </button>
 
+        <!-- Show the "thank you" message, but ONLY if there is one (v-if = show only if true). -->
         <p v-if="confirmation">{{ confirmation }}</p>
 
+        <!-- ===== LESSONS PAGE ===== -->
+        <!-- Only show this section when the cart is NOT being shown (! means "not"). -->
         <div v-if="!displayCart">
+            <!-- A paragraph that holds the sorting options. -->
             <p>
+                <!-- A label with the text "Sort by:" next to the dropdown. -->
                 <label>Sort by:
+                    <!-- A dropdown menu. v-model links the chosen option to "sortType" in Vue. -->
                     <select v-model="sortType">
+                        <!-- Option to sort by price. -->
                         <option value="price">Price</option>
+                        <!-- Option to sort by spaces left. -->
                         <option value="availability">Availability</option>
+                        <!-- Option to sort by location. -->
                         <option value="location">Location</option>
+                        <!-- Option to sort by subject name. -->
                         <option value="subject">Subject</option>
+                    <!-- End of the dropdown. -->
                     </select>
+                <!-- End of the "Sort by" label. -->
                 </label>
+                <!-- Radio button for Ascending (low to high). Picking it sets sortAscending to true. -->
                 <label><input type="radio" :value="true" v-model="sortAscending"> Ascending</label>
+                <!-- Radio button for Descending (high to low). Picking it sets sortAscending to false. -->
                 <label><input type="radio" :value="false" v-model="sortAscending"> Descending</label>
+            <!-- End of the sorting paragraph. -->
             </p>
+            <!-- v-for is a loop: make one copy of this div for EACH lesson in sortedLessons. -->
+            <!-- :key gives each copy a unique id so Vue can keep track of them. -->
             <div v-for="lesson in sortedLessons" :key="lesson.id">
+                <!-- A line break (empty space). -->
                 <br>
+                <!-- Show the lesson's subject as a big heading. -->
                 <h1>{{ lesson.subject }}</h1>
+                <!-- Show the lesson's location. -->
                 <p>Location: {{ lesson.location }}</p>
+                <!-- Show the lesson's price. -->
                 <p>Price: {{ lesson.price }}</p>
+                <!-- Show how many spaces are left. -->
                 <p>Spaces: {{ lesson.availability }}</p>
+                <!-- Show the lesson's picture. :src gets the full image address from imageUrl(). -->
+                <!-- :alt is the backup text if the image cannot load. -->
                 <img :src="imageUrl(lesson.image)" :alt="lesson.subject">
+                <!-- Another line break. -->
                 <br>
+                <!-- "Add to cart" button. When clicked, run addToCart() for this lesson. -->
+                <!-- It is turned off when there are no spaces left (canAddToCart gives false). -->
                 <button @click="addToCart(lesson)" :disabled="!canAddToCart(lesson)">Add to cart</button>
+            <!-- End of one lesson. -->
             </div>
+        <!-- End of the lessons page. -->
         </div>
 
+        <!-- ===== CHECKOUT PAGE ===== -->
+        <!-- v-else means: show this when the v-if above is false (when displayCart is true). -->
         <div v-else>
+            <!-- The heading of the checkout page. -->
             <h1>Checkout</h1>
 
+            <!-- Loop through every lesson. -->
             <div v-for="lesson in lessons" :key="lesson.id">
+                <!-- Only show this lesson if it is in the cart at least once. -->
                 <p v-if="countInCart(lesson.id) > 0">
+                    <!-- Show the subject and how many of it are in the cart, e.g. "English x 2". -->
                     {{ lesson.subject }} x {{ countInCart(lesson.id) }}
+                    <!-- Remove button. When clicked, take one of this lesson out of the cart. -->
                     <button @click="removeFromCart(lesson)">Remove</button>
+                <!-- End of this cart item. -->
                 </p>
+            <!-- End of the loop. -->
             </div>
 
+            <!-- Paragraph for the name box. -->
             <p>
+                <!-- A text box for the name. v-model links what is typed to order.name in Vue. -->
                 <label>Name: <input type="text" v-model="order.name"></label>
+            <!-- End of the name paragraph. -->
             </p>
+            <!-- Paragraph for the phone box. -->
             <p>
+                <!-- A text box for the phone number. v-model links it to order.telephone in Vue. -->
                 <label>Telephone: <input type="text" v-model="order.telephone"></label>
+            <!-- End of the phone paragraph. -->
             </p>
+            <!-- Final Checkout button. When clicked, run checkout() to send the order. -->
+            <!-- It stays turned off until both the name and phone number are filled in. -->
             <button @click="checkout" :disabled="!canCheckout">Checkout</button>
+        <!-- End of the checkout page. -->
         </div>
+    <!-- End of the Vue app. -->
     </div>
 
+    <!-- Load the Vue library from the internet. It must load BEFORE our own code. -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Load our own Vue code (the Vue.js file). -->
     <script src="Vue.js"></script>
+<!-- End of the body. -->
 </body>
+<!-- End of the web page. -->
 </html>

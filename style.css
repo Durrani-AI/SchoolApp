@@ -1,1 +1,4 @@
+/* Style every image (img) on the page: */
+/* width: 300px  -> make every image 300 pixels wide. */
+/* height: auto  -> work out the height by itself so the picture is not stretched or squashed. */
 img { width: 300px; height: auto; }
