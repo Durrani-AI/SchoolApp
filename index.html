@@ -31,6 +31,12 @@
         <!-- Show the "thank you" message, but ONLY if there is one (v-if = show only if true). -->
         <p v-if="confirmation">{{ confirmation }}</p>
 
+        <!-- Show an error message if talking to the server went wrong (e.g. failed to load or save). -->
+        <p v-if="errorMessage">{{ errorMessage }}</p>
+
+        <!-- Show a loading message while waiting for the Render server to wake up and send lessons. -->
+        <p v-if="loading">Loading lessons from server (this may take up to 60 seconds if the server is waking up)...</p>
+
         <!-- ===== LESSONS PAGE ===== -->
         <!-- Only show this section when the cart is NOT being shown (! means "not"). -->
         <div v-if="!displayCart">

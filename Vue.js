@@ -1,6 +1,11 @@
 // Take the "createApp" tool out of the Vue library (Vue is loaded in index.html).
 // "createApp" is what we use to build our Vue app.
 const {createApp} = Vue
+
+// The base web address (URL) of our backend server on Render.
+// We keep it in ONE variable here so if the address ever changes, we only update this one line.
+const API_URL = "https://backend-server-m01049109.onrender.com"
+
         // Start building our Vue app. Everything inside the { } is the app's settings.
         createApp({
             // "data" holds all the information (variables) the app remembers.
@@ -11,8 +16,13 @@ const {createApp} = Vue
                     // "lessons" is a list of all the lessons. It starts EMPTY ([]) because
                     // the real lessons are loaded from MongoDB by fetchData().
                     // Each lesson from MongoDB has: _id (MongoDB's unique id), subject, location,
-                    // price, availability (how many spaces are left) and an image file name.
+                    // price, and availability (how many spaces are left).
                     lessons: [],
+                    // "loading" tracks whether we are still waiting for the server to send the lessons.
+                    // Render's free server can take 30-60 seconds to wake up, so we show "Loading..." while true.
+                    loading: true,
+                    // "errorMessage" holds any error text if talking to the server goes wrong. Starts empty.
+                    errorMessage: '',
                     // "order" holds what the user types in the checkout form.
                     order: {
                         // The user's name. It starts empty ('').
@@ -46,20 +56,40 @@ const {createApp} = Vue
                 // fetchData gets the lessons from the server.
                 // "async" means this function has to wait for things (like the internet).
                 async fetchData() {
-                    // The web address (URL) of the server where the lessons are stored.
-                    const url = "http://localhost:3000/lessons"
-                    // Ask the server for the lessons. "await" means: wait here until it answers.
-                    let response = await (fetch(url))
-                    // Turn the server's answer (JSON text) into a JavaScript list,
-                    // and save it into "lessons". The page then updates automatically.
-                    this.lessons = await response.json()
+                    // Show the "Loading..." message while we wait for the server.
+                    this.loading = true
+                    // Clear any old error message before trying.
+                    this.errorMessage = ''
+                    // "try" attempts the code inside. If the internet/server fails, it jumps to "catch".
+                    try {
+                        // The web address (URL) of the server where the lessons are stored.
+                        const url = API_URL + "/lessons"
+                        // Ask the server for the lessons. "await" means: wait here until it answers.
+                        let response = await fetch(url)
+                        // Check if the server replied with an error (response.ok is false for 400/500 errors).
+                        if (!response.ok) {
+                            // Show a helpful error message on the page and stop here.
+                            this.errorMessage = "Could not load lessons from the server. Please refresh to try again."
+                            return
+                        } // End of response.ok check.
+                        // Turn the server's answer (JSON text) into a JavaScript list,
+                        // and save it into "lessons". The page then updates automatically.
+                        this.lessons = await response.json()
+                    } catch (error) {
+                        // If the server could not be reached at all (e.g. no Wi-Fi), show an error message.
+                        this.errorMessage = "Failed to connect to the server. Please check your connection and refresh."
+                    } finally {
+                        // "finally" always runs at the end (whether it worked or failed).
+                        // Turn off the "Loading..." message because we are done waiting.
+                        this.loading = false
+                    } // End of try/catch/finally.
                 }, // End of fetchData().
                 // imageUrl builds the full web address of a lesson's picture.
                 // "path" is the image file name, e.g. 'image.jpg' or '/image.jpg'.
                 imageUrl(path) {
                     // Turn path into text, remove any "/" at the start, then stick
-                    // the server address in front. Result: "http://localhost:3000/image.jpg"
-                    return "http://localhost:3000/" + String(path).replace(/^\/+/, '')
+                    // the server address in front. Result: "https://backend-server-m01049109.onrender.com/image.jpg"
+                    return API_URL + "/" + String(path).replace(/^\/+/, '')
                 }, // End of imageUrl().
                 // addToCart puts a lesson into the shopping cart.
                 addToCart(lesson) {
@@ -101,6 +131,9 @@ const {createApp} = Vue
                 // checkout sends the order to the server.
                 // "async" because it has to wait for the server.
                 async checkout() {
+                    // Clear any previous error or confirmation message before sending the order.
+                    this.errorMessage = ''
+                    this.confirmation = ''
                     // Put all the order details together into one object.
                     const orderData = {
                         // The name the user typed in.
@@ -110,34 +143,51 @@ const {createApp} = Vue
                         // ONLY the list of lesson _ids in the cart - no subject, location, price etc.
                         lessonIDs: this.cart
                     } // End of orderData.
-                    // Send the order to the server and wait until it is done.
-                    await fetch("http://localhost:3000/orders", {
-                        // "POST" means we are SENDING (saving) new data, not just getting it.
-                        method: "POST",
-                        // Tell the server that the data we send is in JSON format.
-                        headers: { "Content-Type": "application/json" },
-                        // Turn our orderData object into JSON text so it can be sent.
-                        body: JSON.stringify(orderData)
-                    }) // End of the fetch request.
-                    // TASK 7.7: now tell the server the new number of spaces for each lesson that was ordered.
-                    // Go through every lesson, one at a time.
-                    for (const lesson of this.lessons) {
-                        // Only update lessons that are actually in the cart (counted at least once).
-                        if (this.countInCart(lesson._id) > 0) {
-                            // Send a PUT request to save this lesson's new availability in the database.
-                            await this.updateLesson(lesson)
-                        } // End of the "is it in the cart?" check.
-                    } // End of the loop through the lessons.
-                    // Make the "thank you" message, including the user's name.
-                    this.confirmation = 'Order confirmed. Thank you, ' + this.order.name + '!'
-                    // Empty the cart, because the order is finished.
-                    this.cart = []
-                    // Clear the name box in the form.
-                    this.order.name = ''
-                    // Clear the phone number box in the form.
-                    this.order.telephone = ''
-                    // Go back to the lessons page.
-                    this.displayCart = false
+                    // "try" attempts to send the order and update the lessons. If anything fails, jump to "catch".
+                    try {
+                        // Send the order to the server and wait until it is done.
+                        const response = await fetch(API_URL + "/orders", {
+                            // "POST" means we are SENDING (saving) new data, not just getting it.
+                            method: "POST",
+                            // Tell the server that the data we send is in JSON format.
+                            headers: { "Content-Type": "application/json" },
+                            // Turn our orderData object into JSON text so it can be sent.
+                            body: JSON.stringify(orderData)
+                        }) // End of the fetch request.
+                        // Check if saving the order worked (response.ok is true for status 200).
+                        if (!response.ok) {
+                            // Show an error message and stop here (do not clear the cart).
+                            this.errorMessage = "Order failed to save. Please try again."
+                            return
+                        } // End of response.ok check.
+                        // TASK 7.7: now tell the server the new number of spaces for each lesson that was ordered.
+                        // Go through every lesson, one at a time.
+                        for (const lesson of this.lessons) {
+                            // Only update lessons that are actually in the cart (counted at least once).
+                            if (this.countInCart(lesson._id) > 0) {
+                                // Send a PUT request to save this lesson's new availability in the database.
+                                const updateOk = await this.updateLesson(lesson)
+                                // If updating a lesson's spaces failed, show an error and stop.
+                                if (!updateOk) {
+                                    this.errorMessage = "Order saved, but updating lesson spaces failed."
+                                    return
+                                } // End of updateOk check.
+                            } // End of the "is it in the cart?" check.
+                        } // End of the loop through the lessons.
+                        // Make the "thank you" message, including the user's name.
+                        this.confirmation = 'Order confirmed. Thank you, ' + this.order.name + '!'
+                        // Empty the cart, because the order is finished.
+                        this.cart = []
+                        // Clear the name box in the form.
+                        this.order.name = ''
+                        // Clear the phone number box in the form.
+                        this.order.telephone = ''
+                        // Go back to the lessons page.
+                        this.displayCart = false
+                    } catch (error) {
+                        // If the internet/server connection dropped during checkout, tell the user.
+                        this.errorMessage = "Network error while placing order. Please try again."
+                    } // End of try/catch.
                 }, // End of checkout().
                 // TASK 7.6 / 7.7: updateLesson sends a PUT request to change one lesson in the database.
                 // "lesson" is the lesson we want to update.
@@ -150,8 +200,8 @@ const {createApp} = Vue
                         availability: lesson.availability
                     }; // End of updateBody.
                     // Build the address: the server's lessons route + this lesson's MongoDB _id.
-                    // Example: "http://localhost:3000/lessons/65a1b2c3..."
-                    const url = "http://localhost:3000/lessons/" + lesson._id;
+                    // Example: "https://backend-server-m01049109.onrender.com/lessons/65a1b2c3..."
+                    const url = API_URL + "/lessons/" + lesson._id;
                     // The settings for our request.
                     const options = {
                         // "PUT" means we are UPDATING something that already exists.
@@ -165,8 +215,10 @@ const {createApp} = Vue
                     } // End of options.
                     // Send the request to the server and wait for it to answer.
                     let response = await (fetch (url, options));
-                } // End of updateLesson().
-            }, // End of methods.
+                    // Give back true if the update worked (status 200), or false if it failed.
+                    return response.ok;
+                                 } // End of updateLesson().
+                                                                                                                                                                                        }, // End of methods.
             // "computed" values are worked out automatically from the data.
             // Whenever the data they use changes, they recalculate by themselves.
             computed: {
