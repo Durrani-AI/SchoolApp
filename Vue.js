@@ -43,7 +43,9 @@ const API_URL = "https://backend-server-m01049109.onrender.com"
                     // true = low to high (A to Z), false = high to low (Z to A).
                     sortAscending: true,
                     // "sortType" decides what to sort the lessons by. It starts as 'price'.
-                    sortType: 'price'
+                    sortType: 'price',
+                    // "searchQuery" holds what the user types in the search box. Starts empty ('').
+                    searchQuery: ''
                 } // End of the data object.
             }, // End of data().
             // "created" runs automatically ONE time, as soon as the app is created.
@@ -251,10 +253,20 @@ const API_URL = "https://backend-server-m01049109.onrender.com"
                         // For everything else, just give back the value as it is.
                         return v
                     } // End of the value helper.
-                    // Make a COPY of the lessons ([...] copies the list) and sort the copy.
-                    // We copy so the original list is not changed.
+                    // Make a COPY of the lessons ([...] copies the list) and filter by searchQuery
+                    // so searching works instantly on screen even while the server replies.
+                    const query = this.searchQuery.trim().toLowerCase()
+                    const filtered = query === ''
+                        ? [...this.lessons]
+                        : this.lessons.filter(lesson =>
+                            String(lesson.subject).toLowerCase().includes(query) ||
+                            String(lesson.location).toLowerCase().includes(query) ||
+                            String(lesson.price).toLowerCase().includes(query) ||
+                            String(lesson.availability).toLowerCase().includes(query)
+                        )
+                    // Now sort the filtered copy.
                     // "a" and "b" are two lessons being compared to each other.
-                    const sorted = [...this.lessons].sort((a, b) => {
+                    const sorted = filtered.sort((a, b) => {
                         // Get the value to compare from the first lesson.
                         const x = value(a)
                         // Get the value to compare from the second lesson.

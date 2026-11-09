@@ -40,6 +40,16 @@
         <!-- ===== LESSONS PAGE ===== -->
         <!-- Only show this section when the cart is NOT being shown (! means "not"). -->
         <div v-if="!displayCart">
+            <!-- A paragraph for the "search as you type" box. -->
+            <p>
+                <!-- A label and text box for searching lessons. -->
+                <!-- v-model="searchQuery" saves what the user types into Vue's searchQuery variable. -->
+                <!-- sortedLessons automatically filters the lessons as the user types! -->
+                <label>Search:
+                    <input type="text" v-model="searchQuery" placeholder="Search by subject, location, price, spaces...">
+                </label>
+            <!-- End of the search paragraph. -->
+            </p>
             <!-- A paragraph that holds the sorting options. -->
             <p>
                 <!-- A label with the text "Sort by:" next to the dropdown. -->
