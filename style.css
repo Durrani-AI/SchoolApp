@@ -1,4 +1,104 @@
-/* Style every image (img) on the page: */
-/* width: 300px  -> make every image 300 pixels wide. */
-/* height: auto  -> work out the height by itself so the picture is not stretched or squashed. */
-img { width: 300px; height: auto; }
+/* ============================================================
+   style.css - controls how the page LOOKS (colours, spacing, layout).
+   Plain CSS only - no extra libraries.
+   ============================================================ */
+
+/* ----- The whole page ----- */
+body {
+    font-family: Arial, sans-serif;  /* a simple, easy-to-read font that every computer has */
+    max-width: 1000px;               /* stop the page getting too wide on big screens */
+    margin: 0 auto;                  /* "auto" on left and right puts the page in the centre */
+    padding: 20px;                   /* empty space around the edges of the page */
+    background: #f5f5f5;             /* light grey background */
+    color: #333;                     /* dark grey text (softer on the eyes than pure black) */
+    text-align: center;              /* centre-align all text and contents across the whole page */
+}
+
+/* ----- Top bar (title + Checkout button) ----- */
+header {
+    display: flex;                   /* put the title and the button side by side */
+    flex-direction: column;          /* stack the title and Checkout button neatly in the centre */
+    align-items: center;             /* centre them horizontally */
+    gap: 10px;                       /* small space between the title and the Checkout button */
+    margin-bottom: 16px;             /* space below the top bar */
+}
+
+/* ----- All buttons ----- */
+button {
+    padding: 8px 16px;               /* space inside the button (top/bottom, left/right) */
+    border: none;                    /* remove the default grey border */
+    border-radius: 4px;              /* slightly rounded corners */
+    background: #2c7be5;             /* blue background */
+    color: white;                    /* white text */
+    cursor: pointer;                 /* show the "hand" mouse pointer, so it looks clickable */
+}
+
+/* A button that is turned off (disabled), e.g. "Add to cart" when there are no spaces left. */
+button:disabled {
+    background: #ccc;                /* grey instead of blue */
+    cursor: not-allowed;             /* show the "not allowed" mouse pointer */
+}
+
+/* ----- Text boxes and the dropdown ----- */
+input[type="text"], select {
+    padding: 6px;                    /* a bit of space inside, so the text isn't squashed */
+}
+
+/* ----- The grid that holds all the lesson cards ----- */
+.lesson-list {
+    display: grid;                   /* lay the cards out in rows and columns */
+    /* Fit as many columns as possible, each at least 220px wide.
+       On a phone this becomes 1 column; on a laptop 3 or 4. */
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;                       /* space between the cards */
+}
+
+/* ----- One lesson card ----- */
+.lesson-card {
+    background: white;               /* white box */
+    padding: 16px;                   /* space inside the box */
+    border-radius: 6px;              /* rounded corners */
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);  /* a very light shadow under the box */
+}
+
+/* ----- Lesson pictures ----- */
+img {
+    width: 100%;                     /* fill the full width of the card */
+    height: 150px;                   /* every picture is the same height, so cards line up */
+    object-fit: cover;               /* fill that space without stretching (crops the edges instead) */
+    border-radius: 4px;              /* rounded corners to match the card */
+}
+
+/* ----- Message boxes (confirmation, loading, error) ----- */
+.message {
+    padding: 10px;                   /* space inside the box */
+    border-radius: 4px;              /* rounded corners */
+    background: #e6f4ea;             /* light green background */
+}
+
+/* An error message uses the same box, but light red instead of green. */
+.error {
+    background: #fdecea;
+}
+
+/* ----- Small "Added to cart" pop-up (toast) ----- */
+.toast {
+    position: fixed;                 /* stay fixed on the screen even if the user scrolls */
+    bottom: 20px;                    /* 20px above the bottom of the screen */
+    left: 50%;                       /* place it at the horizontal middle of the screen */
+    transform: translateX(-50%);     /* shift left by half its own width so it is dead-centre */
+    background: #333;                /* dark grey box */
+    color: white;                    /* white text */
+    padding: 10px 20px;              /* space inside the pop-up */
+    border-radius: 4px;              /* slightly rounded corners */
+}
+
+/* ----- Page switch animation -----
+   These work with <transition name="fade"> in index.html (a feature built into Vue).
+   Vue adds these class names automatically while a page is appearing or disappearing. */
+.fade-enter-active, .fade-leave-active {
+    transition: opacity 0.3s;        /* fade over 0.3 seconds */
+}
+.fade-enter-from, .fade-leave-to {
+    opacity: 0;                      /* start (or end) fully see-through */
+}

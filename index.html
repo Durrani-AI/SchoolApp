@@ -19,23 +19,36 @@
 <body>
     <!-- This div is where our Vue app lives. Vue controls everything inside id="app". -->
     <div id="app">
-        <!-- The Checkout button at the top. -->
-        <!-- @click="toggleCart" -> when clicked, run toggleCart() to switch pages. -->
-        <!-- :disabled="..." -> grey out (turn off) the button if the cart is empty AND we are on the lessons page. -->
-        <button @click="toggleCart" :disabled="numberOfItems === 0 && !displayCart">
-            <!-- Show the word "Checkout" and the number of items in the cart. {{ }} prints a value from Vue. -->
-            Checkout ({{ numberOfItems }})
-        <!-- End of the Checkout button. -->
-        </button>
+        <!-- The top bar of the page: the title on the left and the Checkout button on the right. -->
+        <header>
+            <!-- The main title of the website. -->
+            <h1>After-School Lessons</h1>
+            <!-- The Checkout button at the top. -->
+            <!-- @click="toggleCart" -> when clicked, run toggleCart() to switch pages. -->
+            <!-- :disabled="..." -> grey out (turn off) the button if the cart is empty AND we are on the lessons page. -->
+            <button @click="toggleCart" :disabled="numberOfItems === 0 && !displayCart">
+                <!-- Show the word "Checkout" and the number of items in the cart. {{ }} prints a value from Vue. -->
+                Checkout ({{ numberOfItems }})
+            <!-- End of the Checkout button. -->
+            </button>
+        <!-- End of the top bar. -->
+        </header>
 
         <!-- Show the "thank you" message, but ONLY if there is one (v-if = show only if true). -->
-        <p v-if="confirmation">{{ confirmation }}</p>
+        <!-- class="message" gives it a light green box (see style.css). -->
+        <p v-if="confirmation" class="message">{{ confirmation }}</p>
 
         <!-- Show an error message if talking to the server went wrong (e.g. failed to load or save). -->
-        <p v-if="errorMessage">{{ errorMessage }}</p>
+        <!-- class="message error" gives it the same box, but in light red. -->
+        <p v-if="errorMessage" class="message error">{{ errorMessage }}</p>
 
         <!-- Show a loading message while waiting for the Render server to wake up and send lessons. -->
-        <p v-if="loading">Loading lessons from server (this may take up to 60 seconds if the server is waking up)...</p>
+        <p v-if="loading" class="message">Loading lessons from server (this may take up to 60 seconds if the server is waking up)...</p>
+
+        <!-- <transition> is built into Vue. It fades between the Lessons page and the Checkout page. -->
+        <!-- name="fade" links it to the .fade-... rules in style.css. -->
+        <!-- mode="out-in" means: fade the old page out first, THEN fade the new page in. -->
+        <transition name="fade" mode="out-in">
 
         <!-- ===== LESSONS PAGE ===== -->
         <!-- Only show this section when the cart is NOT being shown (! means "not"). -->
@@ -74,28 +87,29 @@
                 <label><input type="radio" :value="false" v-model="sortAscending"> Descending</label>
             <!-- End of the sorting paragraph. -->
             </p>
-            <!-- v-for is a loop: make one copy of this div for EACH lesson in sortedLessons. -->
-            <!-- :key gives each copy a unique id (the MongoDB _id) so Vue can keep track of them. -->
-            <div v-for="lesson in sortedLessons" :key="lesson._id">
-                <!-- A line break (empty space). -->
-                <br>
-                <!-- Show the lesson's subject as a big heading. -->
-                <h1>{{ lesson.subject }}</h1>
-                <!-- Show the lesson's location. -->
-                <p>Location: {{ lesson.location }}</p>
-                <!-- Show the lesson's price. -->
-                <p>Price: {{ lesson.price }}</p>
-                <!-- Show how many spaces are left. -->
-                <p>Spaces: {{ lesson.availability }}</p>
-                <!-- Show the lesson's picture. :src gets the full image address from imageUrl(). -->
-                <!-- :alt is the backup text if the image cannot load. -->
-                <img :src="imageUrl(lesson.image)" :alt="lesson.subject">
-                <!-- Another line break. -->
-                <br>
-                <!-- "Add to cart" button. When clicked, run addToCart() for this lesson. -->
-                <!-- It is turned off when there are no spaces left (canAddToCart gives false). -->
-                <button @click="addToCart(lesson)" :disabled="!canAddToCart(lesson)">Add to cart</button>
-            <!-- End of one lesson. -->
+            <!-- A box that holds all the lesson cards. class="lesson-list" lays them out in a grid (see style.css). -->
+            <div class="lesson-list">
+                <!-- v-for is a loop: make one card for EACH lesson in sortedLessons. -->
+                <!-- :key gives each card a unique id (the MongoDB _id) so Vue can keep track of them. -->
+                <!-- class="lesson-card" gives each lesson a white box with a light shadow (see style.css). -->
+                <div v-for="lesson in sortedLessons" :key="lesson._id" class="lesson-card">
+                    <!-- Show the lesson's picture. :src gets the full image address from imageUrl(). -->
+                    <!-- :alt is the backup text if the image cannot load. -->
+                    <img :src="imageUrl(lesson.image)" :alt="lesson.subject">
+                    <!-- Show the lesson's subject as a heading. -->
+                    <h2>{{ lesson.subject }}</h2>
+                    <!-- Show the lesson's location. -->
+                    <p>Location: {{ lesson.location }}</p>
+                    <!-- Show the lesson's price. -->
+                    <p>Price: {{ lesson.price }}</p>
+                    <!-- Show how many spaces are left. -->
+                    <p>Spaces: {{ lesson.availability }}</p>
+                    <!-- "Add to cart" button. When clicked, run addToCart() for this lesson. -->
+                    <!-- It is turned off when there are no spaces left (canAddToCart gives false). -->
+                    <button @click="addToCart(lesson)" :disabled="!canAddToCart(lesson)">Add to cart</button>
+                <!-- End of one lesson card. -->
+                </div>
+            <!-- End of the lesson cards box. -->
             </div>
         <!-- End of the lessons page. -->
         </div>
@@ -104,20 +118,24 @@
         <!-- v-else means: show this when the v-if above is false (when displayCart is true). -->
         <div v-else>
             <!-- The heading of the checkout page. -->
-            <h1>Checkout</h1>
+            <h2>Checkout</h2>
 
             <!-- Loop through every lesson. -->
             <div v-for="lesson in lessons" :key="lesson._id">
                 <!-- Only show this lesson if it is in the cart at least once. -->
                 <p v-if="countInCart(lesson._id) > 0">
-                    <!-- Show the subject and how many of it are in the cart, e.g. "English x 2". -->
-                    {{ lesson.subject }} x {{ countInCart(lesson._id) }}
+                    <!-- Show the subject, how many are in the cart, the location and the price of one lesson. -->
+                    <!-- e.g. "English x 2 - Brent Cross - £18 each" -->
+                    {{ lesson.subject }} x {{ countInCart(lesson._id) }} - {{ lesson.location }} - {{ lesson.price }} each
                     <!-- Remove button. When clicked, take one of this lesson out of the cart. -->
                     <button @click="removeFromCart(lesson)">Remove</button>
                 <!-- End of this cart item. -->
                 </p>
             <!-- End of the loop. -->
             </div>
+
+            <!-- Show the total price of everything in the cart (worked out by totalPrice in Vue.js). -->
+            <h3>Total: £{{ totalPrice }}</h3>
 
             <!-- Paragraph for the name box. -->
             <p>
@@ -136,6 +154,13 @@
             <button @click="checkout" :disabled="!canCheckout">Checkout</button>
         <!-- End of the checkout page. -->
         </div>
+
+        <!-- End of the fade transition. -->
+        </transition>
+
+        <!-- The small "Added to cart" pop-up. It only shows while "toast" has some text in it. -->
+        <!-- class="toast" places it at the bottom of the screen (see style.css). -->
+        <p v-if="toast" class="toast">{{ toast }}</p>
     <!-- End of the Vue app. -->
     </div>
 

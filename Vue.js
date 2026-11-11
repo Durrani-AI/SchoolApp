@@ -45,7 +45,9 @@ const API_URL = "https://backend-server-m01049109.onrender.com"
                     // "sortType" decides what to sort the lessons by. It starts as 'price'.
                     sortType: 'price',
                     // "searchQuery" holds what the user types in the search box. Starts empty ('').
-                    searchQuery: ''
+                    searchQuery: '',
+                    // "toast" holds the text of the small "Added to cart" pop-up. Empty = hidden.
+                    toast: ''
                 } // End of the data object.
             }, // End of data().
             // "created" runs automatically ONE time, as soon as the app is created.
@@ -99,6 +101,10 @@ const API_URL = "https://backend-server-m01049109.onrender.com"
                     this.cart.push(lesson._id)
                     // Take 1 away from the spaces left for this lesson.
                     lesson.availability--
+                    // Show the pop-up message, e.g. "English added to cart".
+                    this.toast = lesson.subject + ' added to cart'
+                    // After 2 seconds (2000 milliseconds), empty the text so the pop-up disappears.
+                    setTimeout(() => { this.toast = '' }, 2000)
                 }, // End of addToCart().
                 // removeFromCart takes one of this lesson out of the cart.
                 removeFromCart(lesson) {
@@ -236,6 +242,20 @@ const API_URL = "https://backend-server-m01049109.onrender.com"
                     // "&&" means "and" - both sides must be true.
                     return this.order.name.trim() !== '' && this.order.telephone.trim() !== ''
                 }, // End of canCheckout.
+                // totalPrice = the total cost of everything in the cart.
+                totalPrice() {
+                    // Start the total at 0.
+                    let total = 0
+                    // Go through every lesson.
+                    for (const lesson of this.lessons) {
+                        // Turn the price text into a number ('£18' becomes 18).
+                        const price = parseFloat(String(lesson.price).replace(/[^0-9.]/g, ''))
+                        // Add (price x how many times it is in the cart). Lessons not in the cart add 0.
+                        total += price * this.countInCart(lesson._id)
+                    } // End of the loop.
+                    // Give back the final total.
+                    return total
+                }, // End of totalPrice.
                 // sortedLessons = the lessons list, put in the order the user chose.
                 sortedLessons() {
                     // Save what we are sorting by (e.g. 'price' or 'subject') in "type".
