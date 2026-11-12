@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <!-- The line above tells the browser this is a modern HTML5 page. -->
 <!-- (It must always be the very first line, so this comment comes after it.) -->
 <!-- The start of the web page. lang="en" means the page is in English. -->
@@ -19,7 +19,7 @@
 <body>
     <!-- This div is where our Vue app lives. Vue controls everything inside id="app". -->
     <div id="app">
-        <!-- The top bar of the page: the title on the left and the Checkout button on the right. -->
+        <!-- The top of the page: the title, with the Checkout button underneath. -->
         <header>
             <!-- The main title of the website. -->
             <h1>After-School Lessons</h1>
@@ -145,8 +145,8 @@
             </p>
             <!-- Paragraph for the phone box. -->
             <p>
-                <!-- A text box for the phone number. v-model links it to order.telephone in Vue. -->
-                <label>Telephone: <input type="text" v-model="order.telephone"></label>
+                <!-- A text box for the phone number. v-model links it to order.phone in Vue. -->
+                <label>Telephone: <input type="text" v-model="order.phone"></label>
             <!-- End of the phone paragraph. -->
             </p>
             <!-- Final Checkout button. When clicked, run checkout() to send the order. -->

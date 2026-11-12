@@ -14,15 +14,6 @@ body {
     text-align: center;              /* centre-align all text and contents across the whole page */
 }
 
-/* ----- Top bar (title + Checkout button) ----- */
-header {
-    display: flex;                   /* put the title and the button side by side */
-    flex-direction: column;          /* stack the title and Checkout button neatly in the centre */
-    align-items: center;             /* centre them horizontally */
-    gap: 10px;                       /* small space between the title and the Checkout button */
-    margin-bottom: 16px;             /* space below the top bar */
-}
-
 /* ----- All buttons ----- */
 button {
     padding: 8px 16px;               /* space inside the button (top/bottom, left/right) */
