@@ -115,6 +115,10 @@ createApp({
                 // Give the space back: add 1 to the spaces left.
                 lesson.availability++
             }
+            // If the cart is now completely empty, automatically go back to the lessons page.
+            if (this.cart.length === 0) {
+                this.displayCart = false
+            }
         },
 
         // canAddToCart checks if a lesson can still be added.
@@ -152,8 +156,13 @@ createApp({
                     // Tell the server that the data we send is in JSON format.
                     headers: { "Content-Type": "application/json" },
                     // Turn the order into JSON text so it can be sent.
-                    // It holds the name, phone, and ONLY the lesson _ids in the cart (no subject, price etc.).
-                    body: JSON.stringify({ name: this.order.name, phone: this.order.phone, lessonIDs: this.cart })
+                    // It holds the name, phone, ONLY the lesson _ids in the cart, and the total number of spaces ordered.
+                    body: JSON.stringify({
+                        name: this.order.name,
+                        phone: this.order.phone,
+                        lessonIDs: this.cart,
+                        spaces: this.cart.length
+                    })
                 })
                 // Check if saving the order worked (response.ok is true for status 200).
                 if (!response.ok) {
@@ -219,10 +228,12 @@ createApp({
 
         // canCheckout = is the user allowed to press "Checkout"?
         canCheckout() {
-            // True only if BOTH the name AND the phone number are filled in.
-            // ".trim()" removes spaces, so typing only spaces does not count.
-            // "&&" means "and" - both sides must be true.
-            return this.order.name.trim() !== '' && this.order.phone.trim() !== ''
+            // /^[A-Za-z\s]+$/ is a regular expression (regex) that checks for LETTERS and spaces only.
+            const validName = /^[A-Za-z\s]+$/.test(this.order.name.trim())
+            // /^[0-9]+$/ is a regular expression (regex) that checks for NUMBERS (digits 0-9) only.
+            const validPhone = /^[0-9]+$/.test(this.order.phone.trim())
+            // True only if BOTH the name is letters-only AND the phone is numbers-only (and there is at least 1 item).
+            return validName && validPhone && this.cart.length > 0
         },
 
         // totalPrice = the total cost of everything in the cart.
